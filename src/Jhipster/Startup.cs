@@ -44,16 +44,14 @@ namespace MyCompany {
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IServiceProvider serviceProvider,
-            ApplicationDatabaseContext context, IOptions<JHipsterSettings> jhipsterSettingsOptions)
+             IOptions<JHipsterSettings> jhipsterSettingsOptions)
         {
             var jhipsterSettings = jhipsterSettingsOptions.Value;
             app
                 .UseApplicationSecurity(jhipsterSettings)
                 .UseApplicationProblemDetails()
                 .UseApplicationWeb(env)
-                .UseApplicationSwagger()
-                .UseApplicationDatabase(serviceProvider, env)
-                .UseApplicationIdentity(serviceProvider);
+                .UseApplicationSwagger();
         }
 
         protected virtual void AddDatabase(IServiceCollection services)

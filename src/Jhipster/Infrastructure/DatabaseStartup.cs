@@ -1,41 +1,55 @@
-using System;
 using MyCompany.Data;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
+using MongoDB.Bson.Serialization;
+using System.Reflection;
+using System.Security.Authentication;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace MyCompany.Infrastructure {
     public static class DatabaseConfiguration {
         public static IServiceCollection AddDatabaseModule(this IServiceCollection @this, IConfiguration configuration)
         {
-            var entityFrameworkConfiguration = configuration.GetSection("EntityFramework");
-
-            var connection = new SqliteConnection(new SqliteConnectionStringBuilder {
-                DataSource = entityFrameworkConfiguration["DataSource"]
-            }.ToString());
-
-            @this.AddDbContext<ApplicationDatabaseContext>(context => { context.UseSqlite(connection); });
+            RegisterBsonMaps();
+            var settings = MongoClientSettings.FromUrl(new MongoUrl("mongodb://localhost:27017"));
+            settings.SslSettings = new SslSettings { EnabledSslProtocols = SslProtocols.Tls12 };
+            var client = new MongoClient(settings);
+            var database = client.GetDatabase("TestMongoDB");
+            @this.AddSingleton(database);
+            @this.AddScoped(typeof(MongoDataContext<>));
 
             return @this;
         }
 
-        public static IApplicationBuilder UseApplicationDatabase(this IApplicationBuilder @this,
-            IServiceProvider serviceProvider, IHostEnvironment environment)
+        private static void RegisterBsonMaps()
         {
-            if (environment.IsDevelopment() || environment.IsProduction())
+            foreach (var type in MongoCollections.TypeCollectionMap.Keys)
             {
-                using (var scope = serviceProvider.CreateScope())
+                if (!BsonClassMap.IsClassMapRegistered(type))
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDatabaseContext>();
-                    context.Database.OpenConnection();
-                    context.Database.EnsureCreated();
+                    typeof(DatabaseConfiguration)
+                        .GetMethod("Init", BindingFlags.Static | BindingFlags.NonPublic)?
+                        .MakeGenericMethod(type)
+                        .Invoke(null, null);
                 }
             }
+        }
 
-            return @this;
+        private static void Initializer<TClass>(BsonClassMap<TClass> cm)
+            where TClass : IModel
+        {
+            cm.AutoMap();
+            cm.MapIdMember(c => c.Id).SetIdGenerator(CombGuidGenerator.Instance);
+            cm.SetDiscriminator(typeof(TClass).Name);
+            cm.SetDiscriminatorIsRequired(true);
+            cm.SetIgnoreExtraElements(true);
+        }
+
+        private static void Init<TClass>()
+            where TClass : IModel
+        {
+            BsonClassMap.RegisterClassMap<TClass>(Initializer);
         }
     }
 }

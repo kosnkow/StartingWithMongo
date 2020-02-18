@@ -145,3 +145,17 @@ Desktop.ini
 # ESLint
 ######################
 .eslintcache
+/test/Jhipster.Test/bin
+/src/JHipsterNet/obj
+/src/JHipsterNet/bin
+/test/Jhipster.Test/obj
+/src/Jhipster/wwwroot/app
+/src/Jhipster/wwwroot/swagger-ui
+/src/Jhipster/wwwroot/content
+/src/Jhipster/bin
+/src/Jhipster/obj
+/.vs
+/src/Jhipster/wwwroot/manifest.webapp
+/src/Jhipster/wwwroot/robots.txt
+/src/Jhipster/wwwroot/favicon.ico
+/src/Jhipster/wwwroot/index.html

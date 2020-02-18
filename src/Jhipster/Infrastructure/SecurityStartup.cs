@@ -47,11 +47,6 @@ namespace MyCompany.Infrastructure {
                     options.SignIn.RequireConfirmedEmail = true;
                     options.ClaimsIdentity.UserNameClaimType = UserNameClaimType;
                 })
-                .AddEntityFrameworkStores<ApplicationDatabaseContext>()
-                .AddUserStore<UserStore<User, Role, ApplicationDatabaseContext, string, IdentityUserClaim<string>,
-                    UserRole, IdentityUserLogin<string>, IdentityUserToken<string>, IdentityRoleClaim<string>>>()
-                .AddRoleStore<RoleStore<Role, ApplicationDatabaseContext, string, UserRole, IdentityRoleClaim<string>>
-                >()
                 .AddDefaultTokenProviders();
 
             @this
