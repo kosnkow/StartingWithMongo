@@ -26,7 +26,7 @@ namespace MyCompany {
             services
             .AddNhipsterModule(Configuration);
 
-            AddDatabase(services);
+            //AddDatabase(services);
 
             services
             .AddSecurityModule()
@@ -43,15 +43,15 @@ namespace MyCompany {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IServiceProvider serviceProvider,
-             IOptions<JHipsterSettings> jhipsterSettingsOptions)
+        public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IServiceProvider serviceProvider, IOptions<JHipsterSettings> jhipsterSettingsOptions)
         {
             var jhipsterSettings = jhipsterSettingsOptions.Value;
             app
                 .UseApplicationSecurity(jhipsterSettings)
                 .UseApplicationProblemDetails()
                 .UseApplicationWeb(env)
-                .UseApplicationSwagger();
+                .UseApplicationSwagger()
+                .UseApplicationIdentity(serviceProvider);
         }
 
         protected virtual void AddDatabase(IServiceCollection services)

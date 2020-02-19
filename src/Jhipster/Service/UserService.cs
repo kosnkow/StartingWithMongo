@@ -210,10 +210,9 @@ namespace MyCompany.Service {
 
         private async Task<User> getUserWithUserRolesByName(string name)
         {
-            return await _userManager.Users
-                .Include(it => it.UserRoles)
-                .ThenInclude(r => r.Role)
-                .SingleOrDefaultAsync(it => it.UserName == name);
+            return _userManager.Users
+                .Include(it => it.Roles)
+                .SingleOrDefault(it => it.UserName == name);
         }
 
         private async Task<bool> RemoveNonActivatedUser(User existingUser)

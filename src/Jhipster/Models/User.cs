@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MyCompany.Models.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
+using AspNetCore.Identity.MongoDbCore.Models;
 
 namespace MyCompany.Models {
-    public class User : IdentityUser, IAuditedEntityBase {
+    public class User : MongoIdentityUser<string>, IAuditedEntityBase {
         public string Login {
             get => UserName;
             set => UserName = value;

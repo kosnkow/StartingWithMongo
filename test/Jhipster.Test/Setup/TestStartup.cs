@@ -17,10 +17,9 @@ namespace MyCompany.Test.Setup
         {
         }
 
-        public override void Configure(IApplicationBuilder app, IHostEnvironment env, IServiceProvider serviceProvider, 
-            ApplicationDatabaseContext context, IOptions<JHipsterSettings> jhipsterSettingsOptions)
+        public override void Configure(IApplicationBuilder app, IHostEnvironment env, IServiceProvider serviceProvider, IOptions<JHipsterSettings> jhipsterSettingsOptions)
         {
-            base.Configure(app, env, serviceProvider, context, jhipsterSettingsOptions);
+            base.Configure(app, env, serviceProvider, jhipsterSettingsOptions);
         }
 
         public override void ConfigureServices(IServiceCollection services)

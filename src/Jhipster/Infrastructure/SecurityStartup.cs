@@ -19,6 +19,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using AuthenticationService = MyCompany.Service.AuthenticationService;
 using IAuthenticationService = MyCompany.Service.IAuthenticationService;
+using AspNetCore.Identity.MongoDbCore;
+using MongoDB.Driver;
 
 namespace MyCompany.Infrastructure {
     public static class SecurityStartup {
@@ -47,6 +49,8 @@ namespace MyCompany.Infrastructure {
                     options.SignIn.RequireConfirmedEmail = true;
                     options.ClaimsIdentity.UserNameClaimType = UserNameClaimType;
                 })
+                .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestMongoDB")
+                .AddSignInManager()
                 .AddDefaultTokenProviders();
 
             @this
