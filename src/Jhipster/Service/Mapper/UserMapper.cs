@@ -40,7 +40,7 @@ namespace MyCompany.Service.Mapper {
                 ImageUrl = userDto.ImageUrl,
                 Activated = userDto.Activated,
                 LangKey = userDto.LangKey,
-                UserRoles = userRoles
+                Roles = userDto.Roles.ToList()
             };
         }
 

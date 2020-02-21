@@ -22,8 +22,8 @@ namespace MyCompany.Service.Dto {
             Activated = user.Activated;
             ImageUrl = user.ImageUrl;
             LangKey = user.LangKey;
-            Roles = user.UserRoles != null
-                ? user.UserRoles.Select(iur => iur.Role.Name).ToHashSet()
+            Roles = user.Roles != null
+                ? user.Roles.Select(iur => iur).ToHashSet()
                 : new HashSet<string>();
         }
 

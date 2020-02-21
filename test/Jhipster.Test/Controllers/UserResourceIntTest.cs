@@ -305,7 +305,7 @@ namespace MyCompany.Test.Controllers {
             user.Activated.Should().Be(true);
             user.ImageUrl.Should().Be(DefaultImageurl);
             user.LangKey.Should().Be(DefaultLangkey);
-            user.UserRoles.Select(it => it.Role.Name).Should().OnlyContain(it => it == RolesConstants.USER);
+            user.Roles.Select(it => it).Should().OnlyContain(it => it == RolesConstants.USER);
         }
 
         [Fact]
@@ -330,13 +330,8 @@ namespace MyCompany.Test.Controllers {
         {
             _user.Id = DefaultId;
             //TODO set CreatedBy etc
-            var userRoles = new HashSet<UserRole> {
-                new UserRole {
-                    UserId = _user.Id,
-                    Role = new Role {Name = RolesConstants.USER}
-                }
-            };
-            _user.UserRoles = userRoles;
+            var roles = new List<string> { RolesConstants.USER };
+            _user.Roles = roles;
 
             var userDto = _userMapper.UserToUserDto(_user);
             userDto.Id.Should().Be(DefaultId);

@@ -743,8 +743,7 @@ namespace MyCompany.Test.Controllers {
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var updatedUser = await userManager.Users
-                .Include(it => it.UserRoles)
-                .ThenInclude(r => r.Role)
+                .Include(it => it.Roles)
                 .SingleOrDefaultAsync(it => it.UserName == user.Login);
 
             //TODO FIX database refresh to prevent the usage of context/Reload
@@ -756,7 +755,7 @@ namespace MyCompany.Test.Controllers {
             updatedUser.ImageUrl.Should().Be(userDto.ImageUrl);
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
             updatedUser.Activated.Should().BeTrue();
-            updatedUser.UserRoles.IsNullOrEmpty().Should().BeTrue();
+            updatedUser.Roles.IsNullOrEmpty().Should().BeTrue();
         }
 
         [Fact]

@@ -44,8 +44,6 @@ namespace MyCompany.Models {
 
         [Column("reset_date")] public DateTime? ResetDate { get; set; }
 
-        [JsonIgnore] public virtual ICollection<UserRole> UserRoles { get; set; }
-
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public string LastModifiedBy { get; set; }
