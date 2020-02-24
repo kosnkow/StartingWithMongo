@@ -45,14 +45,6 @@ namespace MyCompany.Infrastructure {
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
 
-            @this.AddIdentity<User, Role>(options => {
-                    options.SignIn.RequireConfirmedEmail = true;
-                    options.ClaimsIdentity.UserNameClaimType = UserNameClaimType;
-                })
-                .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestMongoDB")
-                .AddSignInManager()
-                .AddDefaultTokenProviders();
-
             @this
                 .AddAuthentication(options => {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

@@ -9,6 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using MyCompany.Models;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Identity;
 
 [assembly: ApiController]
 
@@ -26,7 +29,7 @@ namespace MyCompany {
             services
             .AddNhipsterModule(Configuration);
 
-            //AddDatabase(services);
+            AddDatabase(services);
 
             services
             .AddSecurityModule()
@@ -57,6 +60,14 @@ namespace MyCompany {
         protected virtual void AddDatabase(IServiceCollection services)
         {
             services.AddDatabaseModule(Configuration);
+
+            services.AddIdentity<User, Role>(options => {
+                options.SignIn.RequireConfirmedEmail = true;
+                options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
+            })
+            .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestMongoDB")
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
         }
     }
 }

@@ -16,6 +16,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
+using System.Linq;
 
 namespace MyCompany.Test.Controllers {
     public class AccountResourceIntTest {
@@ -51,6 +52,8 @@ namespace MyCompany.Test.Controllers {
             };
 
             await userManager.CreateAsync(user);
+
+            var users = userManager.Users.ToArray();
 
             var response = await client.GetAsync($"/api/activate?key={activationKey}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -742,9 +745,9 @@ namespace MyCompany.Test.Controllers {
             var response = await client.PostAsync("/api/account", TestUtil.ToJsonContent(userDto));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var updatedUser = await userManager.Users
+            var updatedUser = userManager.Users
                 .Include(it => it.Roles)
-                .SingleOrDefaultAsync(it => it.UserName == user.Login);
+                .SingleOrDefault(it => it.UserName == user.Login);
 
             //TODO FIX database refresh to prevent the usage of context/Reload
             updatedUser = Fixme.ReloadUser(_factory, updatedUser);
