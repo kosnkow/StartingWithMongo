@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Mongo2Go;
 using MyCompany.Data;
 using MyCompany.Models;
 using System;
@@ -31,13 +32,7 @@ namespace MyCompany.Test.Setup
 
         protected override void AddDatabase(IServiceCollection services)
         {
-            services.AddIdentity<User, Role>(options => {
-                options.SignIn.RequireConfirmedEmail = true;
-                options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
-            })
-            .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestDB")
-            .AddSignInManager()
-            .AddDefaultTokenProviders();
+
         }
     }
 }
