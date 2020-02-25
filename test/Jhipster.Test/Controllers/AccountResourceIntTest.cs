@@ -17,9 +17,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using System.Linq;
+using MongoDB.Driver;
 
 namespace MyCompany.Test.Controllers {
-    public class AccountResourceIntTest {
+    public class AccountResourceIntTest : IDisposable {
         public AccountResourceIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
@@ -53,15 +54,13 @@ namespace MyCompany.Test.Controllers {
 
             await userManager.CreateAsync(user);
 
-            //var users = userManager.Users.ToArray();
+            var users = userManager.Users.ToArray();
 
             var response = await client.GetAsync($"/api/activate?key={activationKey}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             user = await userManager.FindByNameAsync(user.Login);
             user.Activated.Should().Be(true);
-            _factory.CleanUp();
-            _factory.Dispose();
         }
 
         [Fact]
@@ -70,8 +69,6 @@ namespace MyCompany.Test.Controllers {
             var client = _factory.CreateClient();
             var response = await client.GetAsync("/api/activate?key=wrongActivationKey");
             response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            _factory.CleanUp();
-            _factory.Dispose();
         }
 
         [Fact]
@@ -83,8 +80,6 @@ namespace MyCompany.Test.Controllers {
 
             var responseContent = await response.Content.ReadAsStringAsync();
             responseContent.Should().Contain("test");
-            _factory.CleanUp();
-            _factory.Dispose();
         }
 
         [Fact]
@@ -113,7 +108,6 @@ namespace MyCompany.Test.Controllers {
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, "new password").Should()
                 .Be(PasswordVerificationResult.Success);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -142,8 +136,6 @@ namespace MyCompany.Test.Controllers {
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
-            _factory.CleanUp();
-            _factory.Dispose();
         }
 
         [Fact]
@@ -171,7 +163,6 @@ namespace MyCompany.Test.Controllers {
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -199,7 +190,6 @@ namespace MyCompany.Test.Controllers {
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -230,7 +220,6 @@ namespace MyCompany.Test.Controllers {
                 .Be(PasswordVerificationResult.Failed);
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, currentPassword).Should()
                 .Be(PasswordVerificationResult.Success);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -262,7 +251,6 @@ namespace MyCompany.Test.Controllers {
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, keyAndPassword.NewPassword)
                 .Should().Be(PasswordVerificationResult.Success);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -294,7 +282,6 @@ namespace MyCompany.Test.Controllers {
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             passwordHasher.VerifyHashedPassword(updatedUser, updatedUser.PasswordHash, keyAndPassword.NewPassword)
                 .Should().Be(PasswordVerificationResult.Failed);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -309,7 +296,6 @@ namespace MyCompany.Test.Controllers {
             var response = await client.PostAsync("/api/account/reset-password/finish",
                 TestUtil.ToJsonContent(keyAndPassword));
             response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -342,7 +328,6 @@ namespace MyCompany.Test.Controllers {
             json.SelectToken("$.langKey").Value<string>().Should().Be(user.LangKey);
             json.SelectToken("$.authorities").ToObject<IEnumerable<string>>()
                 .Should().Contain(new[] {RolesConstants.ADMIN});
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -352,7 +337,6 @@ namespace MyCompany.Test.Controllers {
 
             var response = await client.GetAsync("/api/account");
             response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -364,7 +348,6 @@ namespace MyCompany.Test.Controllers {
 
             var responseContent = await response.Content.ReadAsStringAsync();
             responseContent.Should().Be("");
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -392,9 +375,8 @@ namespace MyCompany.Test.Controllers {
 
             var user = await userManager.FindByNameAsync(validUser.Login);
             user.Should().NotBeNull();
-            _factory.CleanUp();
-            //            user.Roles.Count.Should().Be(1);
-            //            user.Roles.Should().Contain(role => role.Name == RolesConstants.USER);
+//            user.Roles.Count.Should().Be(1);
+//            user.Roles.Should().Contain(role => role.Name == RolesConstants.USER);
         }
 
         [Fact]
@@ -474,7 +456,6 @@ namespace MyCompany.Test.Controllers {
             // Register 4th (already activated) user
             response = await client.PostAsync("/api/register", TestUtil.ToJsonContent(secondUser));
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -528,7 +509,6 @@ namespace MyCompany.Test.Controllers {
             // Second (already activated) user
             response = await client.PostAsync("/api/register", TestUtil.ToJsonContent(secondUser));
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -556,7 +536,6 @@ namespace MyCompany.Test.Controllers {
 
             var user = await userManager.FindByNameAsync(invalidUser.Login);
             user.Should().BeNull();
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -584,7 +563,6 @@ namespace MyCompany.Test.Controllers {
 
             var user = await userManager.FindByNameAsync(invalidUser.Login);
             user.Should().BeNull();
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -612,7 +590,6 @@ namespace MyCompany.Test.Controllers {
 
             var user = await userManager.FindByNameAsync(invalidUser.Login);
             user.Should().BeNull();
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -640,8 +617,6 @@ namespace MyCompany.Test.Controllers {
 
             var user = await userManager.FindByNameAsync(invalidUser.Login);
             user.Should().BeNull();
-            _factory.CleanUp();
-            _factory.Dispose();
         }
 
         [Fact]
@@ -670,7 +645,6 @@ namespace MyCompany.Test.Controllers {
 
             user = await userManager.FindByNameAsync(validUser.Login);
             user.Should().NotBeNull();
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -692,7 +666,6 @@ namespace MyCompany.Test.Controllers {
             var response = await client.PostAsync("/api/account/reset-password/init",
                 new StringContent("password-reset@example.com"));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -714,7 +687,6 @@ namespace MyCompany.Test.Controllers {
             var response = await client.PostAsync("/api/account/reset-password/init",
                 new StringContent("password-reset@EXAMPLE.COM"));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -724,7 +696,6 @@ namespace MyCompany.Test.Controllers {
             var response = await client.PostAsync("/api/account/reset-password/init",
                 new StringContent("password-reset-wrong-email@example.com"));
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -771,7 +742,6 @@ namespace MyCompany.Test.Controllers {
             updatedUser.PasswordHash.Should().Be(user.PasswordHash);
             updatedUser.Activated.Should().BeTrue();
             updatedUser.Roles.IsNullOrEmpty().Should().BeTrue();
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -818,8 +788,6 @@ namespace MyCompany.Test.Controllers {
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             updatedUser.Email.Should().Be("save-existing-email@example.com");
-            _factory.CleanUp();
-            _factory.Dispose();
         }
 
         [Fact]
@@ -856,7 +824,6 @@ namespace MyCompany.Test.Controllers {
 
             var updatedUser = await userManager.FindByNameAsync(user.Login);
             updatedUser.Email.Should().Be("save-existing-email-and-login@example.com");
-            _factory.CleanUp();
         }
 
         [Fact]
@@ -893,8 +860,18 @@ namespace MyCompany.Test.Controllers {
 
             user = await userManager.FindByEmailAsync(userDto.Email);
             user.Should().BeNull();
-            _factory.CleanUp();
-            _factory.Dispose();
+        }
+
+        public void Dispose()
+        {
+            var client = new MongoClient("mongodb://localhost:27017");
+
+            if (client != null)
+            {
+                var db = client.GetDatabase("TestDB");
+                db.DropCollection("users");
+                db.DropCollection("roles");
+            }
         }
     }
 }

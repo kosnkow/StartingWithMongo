@@ -14,35 +14,27 @@ namespace MyCompany.Models {
         }
 
         [StringLength(50)]
-        [Column("first_name")]
         public string FirstName { get; set; }
 
         [StringLength(50)]
-        [Column("last_name")]
         public string LastName { get; set; }
 
         [Required] public bool Activated { get; set; }
 
         [StringLength(6, MinimumLength = 2)]
-        [Column("lang_key")]
         public string LangKey { get; set; }
 
         [Url]
         [StringLength(256)]
-        [Column("image_url")]
         public string ImageUrl { get; set; }
 
         [StringLength(20)]
-        [Column("activation_key")]
-        [JsonIgnore]
         public string ActivationKey { get; set; }
 
         [StringLength(20)]
-        [Column("reset_key")]
-        [JsonIgnore]
         public string ResetKey { get; set; }
 
-        [Column("reset_date")] public DateTime? ResetDate { get; set; }
+        public DateTime? ResetDate { get; set; }
 
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }

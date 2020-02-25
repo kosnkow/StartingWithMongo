@@ -13,16 +13,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.JsonWebTokens;
-using Mongo2Go;
-using MyCompany.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace MyCompany.Test.Setup {
     public class NhipsterWebApplicationFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>
         where TEntryPoint : class {
         private IServiceProvider _serviceProvider;
         private ClaimsPrincipal _user { get; set; }
-        private MongoDbRunner _runner { get; set; }
 
         protected override IWebHostBuilder CreateWebHostBuilder()
         {
@@ -40,16 +36,6 @@ namespace MyCompany.Test.Setup {
                     services.Replace(new ServiceDescriptor(typeof(IHttpContextFactory), typeof(MockHttpContextFactory),
                         ServiceLifetime.Transient));
                     services.AddTransient(sp => new MockClaimsPrincipalProvider(_user));
-                    _runner = MongoDbRunner.Start(singleNodeReplSet: false);
-
-                    services.AddIdentity<User, Role>(options =>
-                    {
-                        options.SignIn.RequireConfirmedEmail = true;
-                        options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
-                    })
-                    .AddMongoDbStores<User, Role, string>(_runner.ConnectionString, "TestDB")
-                    .AddSignInManager()
-                    .AddDefaultTokenProviders();
                 });
         }
 
@@ -65,11 +51,6 @@ namespace MyCompany.Test.Setup {
         {
             _user = BuildClaimsPrincipal(name, roles, authenticationType);
             return this;
-        }
-
-        public void CleanUp()
-        {
-            _runner.Dispose();
         }
 
         private static ClaimsPrincipal BuildClaimsPrincipal(string name, IEnumerable<string> roles,

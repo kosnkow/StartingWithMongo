@@ -32,7 +32,16 @@ namespace MyCompany.Test.Setup
 
         protected override void AddDatabase(IServiceCollection services)
         {
+            //services.AddDbContext<ApplicationDatabaseContext>(context => context.UseInMemoryDatabase(databaseName: "TestDB"));
 
+            services.AddIdentity<User, Role>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+                options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
+            })
+            .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestDB")
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
         }
     }
 }
