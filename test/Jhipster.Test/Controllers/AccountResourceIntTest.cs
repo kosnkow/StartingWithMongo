@@ -18,23 +18,20 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Linq;
 using MongoDB.Driver;
+using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
-namespace MyCompany.Test.Controllers {
-    public class AccountResourceIntTest : IDisposable {
+namespace MyCompany.Test.Controllers
+{
+    public class AccountResourceIntTest : IDisposable
+    {
         public AccountResourceIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
-//            _factory.WithWebHostBuilder(builder => {
-//                var mockMailService = A.Fake<IMailService>();
-//                A.CallTo(() => mockMailService.SendActivationEmail(A<User>.Ignored)).Returns(Task.CompletedTask);
-//                builder.ConfigureServices(services => {
-//                    services.Replace(new ServiceDescriptor(typeof(IMailService), sp => mockMailService,
-//                        ServiceLifetime.Scoped));
-//                });
-//            });
+            _dbSettings = _factory.GetRequiredService<MongoDbSettings>();
         }
 
         private readonly NhipsterWebApplicationFactory<TestStartup> _factory;
+        private readonly MongoDbSettings _dbSettings;
 
         [Fact]
         public async Task TestActivateAccount()
@@ -53,8 +50,6 @@ namespace MyCompany.Test.Controllers {
             };
 
             await userManager.CreateAsync(user);
-
-            var users = userManager.Users.ToArray();
 
             var response = await client.GetAsync($"/api/activate?key={activationKey}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -864,11 +859,11 @@ namespace MyCompany.Test.Controllers {
 
         public void Dispose()
         {
-            var client = new MongoClient("mongodb://localhost:27017");
+            var client = new MongoClient(_dbSettings.ConnectionString);
 
             if (client != null)
             {
-                var db = client.GetDatabase("TestDB");
+                var db = client.GetDatabase(_dbSettings.DatabaseName);
                 db.DropCollection("users");
                 db.DropCollection("roles");
             }

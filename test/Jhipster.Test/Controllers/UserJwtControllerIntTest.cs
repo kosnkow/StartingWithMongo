@@ -10,20 +10,27 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
+using MongoDB.Driver;
+using System;
+using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
-namespace MyCompany.Test.Controllers {
-    public class UserJwtControllerIntTest {
+namespace MyCompany.Test.Controllers
+{
+    public class UserJwtControllerIntTest : IDisposable
+    {
         public UserJwtControllerIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
             _client = _factory.CreateClient();
 
             _userManager = _factory.GetRequiredService<UserManager<User>>();
+            _dbSettings = _factory.GetRequiredService<MongoDbSettings>();
             _passwordHasher = _factory.GetRequiredService<IPasswordHasher<User>>();
         }
 
         private readonly NhipsterWebApplicationFactory<TestStartup> _factory;
         private readonly HttpClient _client;
+        private readonly MongoDbSettings _dbSettings;
 
         private readonly UserManager<User> _userManager;
         private readonly IPasswordHasher<User> _passwordHasher;
@@ -104,6 +111,18 @@ namespace MyCompany.Test.Controllers {
             headers.Contains("Authorization").Should().BeTrue();
             var authorization = headers.FirstOrDefault(it => it.Key == "Authorization").Value.FirstOrDefault();
             authorization.Should().NotBeNull().And.NotBeEmpty();
+        }
+
+        public void Dispose()
+        {
+            var client = new MongoClient(_dbSettings.ConnectionString);
+
+            if (client != null)
+            {
+                var db = client.GetDatabase(_dbSettings.DatabaseName);
+                db.DropCollection("users");
+                db.DropCollection("roles");
+            }
         }
     }
 }

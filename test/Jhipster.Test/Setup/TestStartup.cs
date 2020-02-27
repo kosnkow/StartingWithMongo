@@ -1,14 +1,13 @@
+using AspNetCore.Identity.MongoDbCore.Infrastructure;
 using JHipsterNet.Config;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Mongo2Go;
-using MyCompany.Data;
 using MyCompany.Models;
+using MyCompany.Test.Infrastructure;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -32,14 +31,16 @@ namespace MyCompany.Test.Setup
 
         protected override void AddDatabase(IServiceCollection services)
         {
-            //services.AddDbContext<ApplicationDatabaseContext>(context => context.UseInMemoryDatabase(databaseName: "TestDB"));
+            var connection = Configuration.GetSection("TestDatabaseSettings").Get<MongoDbSettings>();
+
+            services.AddSingleton<MongoDbSettings>(connection);
 
             services.AddIdentity<User, Role>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = true;
                 options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
             })
-            .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestDB")
+            .AddMongoDbStores<User, Role, string>(connection.ConnectionString, connection.DatabaseName)
             .AddSignInManager()
             .AddDefaultTokenProviders();
         }

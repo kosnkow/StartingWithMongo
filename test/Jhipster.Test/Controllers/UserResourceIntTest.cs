@@ -13,9 +13,14 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
+using MongoDB.Driver;
+using System;
+using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
-namespace MyCompany.Test.Controllers {
-    public class UserResourceIntTest {
+namespace MyCompany.Test.Controllers
+{
+    public class UserResourceIntTest : IDisposable
+    {
         public UserResourceIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
@@ -23,6 +28,7 @@ namespace MyCompany.Test.Controllers {
 
             _userManager = _factory.GetRequiredService<UserManager<User>>();
             _userMapper = _factory.GetRequiredService<UserMapper>();
+            _dbSettings = _factory.GetRequiredService<MongoDbSettings>();
             _passwordHasher = _userManager.PasswordHasher;
 
             InitTest();
@@ -53,7 +59,7 @@ namespace MyCompany.Test.Controllers {
 
         private readonly NhipsterWebApplicationFactory<TestStartup> _factory;
         private readonly HttpClient _client;
-
+        private readonly MongoDbSettings _dbSettings;
 
         private readonly UserManager<User> _userManager;
         private readonly UserMapper _userMapper;
@@ -377,9 +383,8 @@ namespace MyCompany.Test.Controllers {
             // Validate the User in the database
             var userList = _userManager.Users.ToList();
             userList.Count().Should().Be(databaseSizeBeforeUpdate);
-//            var testUser = userList[userList.Count - 1];
-//            TODO FIX database refresh to prevent the usage of context/Reload
-            var testUser = Fixme.ReloadUser(_factory, updatedUser);
+            var testUser = userList[userList.Count - 1];
+
             testUser.FirstName.Should().Be(UpdatedFirstname);
             testUser.LastName.Should().Be(UpdatedLastname);
             testUser.Email.Should().Be(UpdatedEmail);
@@ -501,15 +506,26 @@ namespace MyCompany.Test.Controllers {
             // Validate the User in the database
             var userList = _userManager.Users.ToList();
             userList.Count().Should().Be(databaseSizeBeforeUpdate);
-//            var testUser = userList[userList.Count - 1];
-//            TODO FIX database refresh to prevent the usage of context/Reload
-            var testUser = Fixme.ReloadUser(_factory, updatedUser);
+            var testUser = userList[userList.Count - 1];
+
             testUser.Login.Should().Be(UpdatedLogin);
             testUser.FirstName.Should().Be(UpdatedFirstname);
             testUser.LastName.Should().Be(UpdatedLastname);
             testUser.Email.Should().Be(UpdatedEmail);
             testUser.ImageUrl.Should().Be(UpdatedImageurl);
             testUser.LangKey.Should().Be(UpdatedLangkey);
+        }
+
+        public void Dispose()
+        {
+            var client = new MongoClient(_dbSettings.ConnectionString);
+
+            if (client != null)
+            {
+                var db = client.GetDatabase(_dbSettings.DatabaseName);
+                db.DropCollection("users");
+                db.DropCollection("roles");
+            }
         }
     }
 }

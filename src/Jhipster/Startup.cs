@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using MyCompany.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity;
+using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
 [assembly: ApiController]
 
@@ -22,7 +23,7 @@ namespace MyCompany {
             Configuration = configuration;
         }
 
-        private IConfiguration Configuration { get; }
+        protected IConfiguration Configuration { get; }
 
         public virtual void ConfigureServices(IServiceCollection services)
         {
@@ -59,13 +60,15 @@ namespace MyCompany {
 
         protected virtual void AddDatabase(IServiceCollection services)
         {
+            var connection = Configuration.GetSection("DatabaseSettings").Get<MongoDbSettings>();
+
             services.AddDatabaseModule(Configuration);
 
             services.AddIdentity<User, Role>(options => {
                 options.SignIn.RequireConfirmedEmail = true;
                 options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
             })
-            .AddMongoDbStores<User, Role, string>("mongodb://localhost:27017", "TestMongoDB")
+            .AddMongoDbStores<User, Role, string>(connection.ConnectionString, connection.DatabaseName)
             .AddSignInManager()
             .AddDefaultTokenProviders();
         }

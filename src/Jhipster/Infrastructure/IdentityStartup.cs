@@ -16,10 +16,6 @@ namespace MyCompany.Infrastructure {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
 
-                //            var op1 = new Operation {Date = DateTime.Now, Description = "An operation", Amount = (decimal) 10.0};
-                //            var op2 = new Operation {Date = DateTime.Now, Description = "Another operation", Amount = (decimal) 20.0};
-                //            var op3 = new Operation {Date = DateTime.Now, Description = "Last one operation", Amount = (decimal) 30.0};
-
                 SeedRoles(roleManager).Wait();
                 SeedUsers(userManager).Wait();
                 SeedUserRoles(userManager).Wait();
