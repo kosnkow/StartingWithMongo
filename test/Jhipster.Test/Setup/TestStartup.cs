@@ -1,4 +1,5 @@
-using AspNetCore.Identity.MongoDbCore.Infrastructure;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using JHipsterNet.Config;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -8,10 +9,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MyCompany.Models;
 using MyCompany.Test.Infrastructure;
-using System;
-using System.IdentityModel.Tokens.Jwt;
 
-namespace MyCompany.Test.Setup 
+namespace MyCompany.Test.Setup
 {
     public class TestStartup : Startup
     {
@@ -31,16 +30,12 @@ namespace MyCompany.Test.Setup
 
         protected override void AddDatabase(IServiceCollection services)
         {
-            var connection = Configuration.GetSection("TestDatabaseSettings").Get<MongoDbSettings>();
-
-            services.AddSingleton<MongoDbSettings>(connection);
-
             services.AddIdentity<User, Role>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = true;
                 options.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.Sub;
             })
-            .AddMongoDbStores<User, Role, string>(connection.ConnectionString, connection.DatabaseName)
+            .AddMongoDbStores<User, Role, string>(TestConfiguration.ConnectionString, TestConfiguration.DatabaseName)
             .AddSignInManager()
             .AddDefaultTokenProviders();
         }

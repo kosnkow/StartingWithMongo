@@ -1,21 +1,21 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Identity;
+using MongoDB.Driver;
 using MyCompany.Models;
 using MyCompany.Models.Vm;
 using MyCompany.Security;
 using MyCompany.Service.Dto;
 using MyCompany.Service.Mapper;
+using MyCompany.Test.Infrastructure;
 using MyCompany.Test.Setup;
-using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
-using MongoDB.Driver;
-using System;
-using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
 namespace MyCompany.Test.Controllers
 {
@@ -28,7 +28,6 @@ namespace MyCompany.Test.Controllers
 
             _userManager = _factory.GetRequiredService<UserManager<User>>();
             _userMapper = _factory.GetRequiredService<UserMapper>();
-            _dbSettings = _factory.GetRequiredService<MongoDbSettings>();
             _passwordHasher = _userManager.PasswordHasher;
 
             InitTest();
@@ -59,7 +58,6 @@ namespace MyCompany.Test.Controllers
 
         private readonly NhipsterWebApplicationFactory<TestStartup> _factory;
         private readonly HttpClient _client;
-        private readonly MongoDbSettings _dbSettings;
 
         private readonly UserManager<User> _userManager;
         private readonly UserMapper _userMapper;
@@ -518,11 +516,11 @@ namespace MyCompany.Test.Controllers
 
         public void Dispose()
         {
-            var client = new MongoClient(_dbSettings.ConnectionString);
+            var client = new MongoClient(TestConfiguration.ConnectionString);
 
             if (client != null)
             {
-                var db = client.GetDatabase(_dbSettings.DatabaseName);
+                var db = client.GetDatabase(TestConfiguration.DatabaseName);
                 db.DropCollection("users");
                 db.DropCollection("roles");
             }

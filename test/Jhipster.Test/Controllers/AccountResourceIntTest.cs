@@ -1,24 +1,24 @@
 using Castle.Core.Internal;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using MyCompany.Infrastructure;
 using MyCompany.Models;
 using MyCompany.Models.Vm;
 using MyCompany.Security;
 using MyCompany.Service.Dto;
+using MyCompany.Test.Infrastructure;
 using MyCompany.Test.Setup;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
-using System.Linq;
-using MongoDB.Driver;
-using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
 namespace MyCompany.Test.Controllers
 {
@@ -27,11 +27,9 @@ namespace MyCompany.Test.Controllers
         public AccountResourceIntTest()
         {
             _factory = new NhipsterWebApplicationFactory<TestStartup>();
-            _dbSettings = _factory.GetRequiredService<MongoDbSettings>();
         }
 
         private readonly NhipsterWebApplicationFactory<TestStartup> _factory;
-        private readonly MongoDbSettings _dbSettings;
 
         [Fact]
         public async Task TestActivateAccount()
@@ -859,13 +857,11 @@ namespace MyCompany.Test.Controllers
 
         public void Dispose()
         {
-            var client = new MongoClient(_dbSettings.ConnectionString);
+            var client = new MongoClient(TestConfiguration.ConnectionString);
 
             if (client != null)
             {
-                var db = client.GetDatabase(_dbSettings.DatabaseName);
-                db.DropCollection("users");
-                db.DropCollection("roles");
+                client.DropDatabase(TestConfiguration.DatabaseName);
             }
         }
     }

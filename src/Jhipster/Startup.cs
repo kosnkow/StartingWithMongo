@@ -1,29 +1,29 @@
-using System;
+using AspNetCore.Identity.MongoDbCore.Infrastructure;
 using JHipsterNet.Config;
-using MyCompany.Data;
-using MyCompany.Infrastructure;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using MyCompany.Infrastructure;
 using MyCompany.Models;
+using Newtonsoft.Json;
+using System;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Identity;
-using AspNetCore.Identity.MongoDbCore.Infrastructure;
 
 [assembly: ApiController]
 
-namespace MyCompany {
+namespace MyCompany
+{
     public class Startup {
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        protected IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         public virtual void ConfigureServices(IServiceCollection services)
         {
